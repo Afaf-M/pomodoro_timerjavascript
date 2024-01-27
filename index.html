@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pomodoro Timer</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f5f5f5;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        #timer-container {
+            text-align: center;
+            background-color: #fff;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        #controls-container {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        #timer-input {
+            width: 100px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+<div id="timer-container">
+    <h2>Pomodoro Timer</h2>
+    <div>
+        <label for="timer-input">Set Timer: </label>
+        <input type="text" id="timer-input" value="25:00:00" readonly>
+        <button onclick="openTimerInput()">Set Timer</button>
+    </div>
+    <div>
+        <p id="timer">25:00:00.000</p>
+    </div>
+    <div id="controls-container">
+        <button onclick="startTimer()">Start</button>
+        <button onclick="resetTimer()">Reset</button>
+        <button onclick="stopTimer()">Stop</button>
+    </div>
+    <p id="interval-counter">Intervals: 0</p>
+</div>
+
+<script>
+    let timerInterval;
+    let timerRunning = false;
+    let intervalCounter = 0;
+
+    function openTimerInput() {
+        const timerInput = document.getElementById('timer-input');
+        const newTime = prompt('Enter the new timer duration (hh:mm:ss):', timerInput.value);
+        if (newTime !== null) {
+            timerInput.value = newTime;
+        }
+    }
+
+    function startTimer() {
+        if (!timerRunning) {
+            const timerInput = document.getElementById('timer-input');
+            const timerDisplay = document.getElementById('timer');
+            const intervalCounterDisplay = document.getElementById('interval-counter');
+
+            const timeComponents = timerInput.value.split(':');
+            let totalTimeInMilliseconds =
+                (parseInt(timeComponents[0]) || 0) * 3600000 +
+                (parseInt(timeComponents[1]) || 0) * 60000 +
+                (parseInt(timeComponents[2]) || 0) * 1000;
+
+            let currentTimeInMilliseconds = totalTimeInMilliseconds;
+
+            timerInterval = setInterval(function () {
+                if (currentTimeInMilliseconds > 0) {
+                    currentTimeInMilliseconds -= 10; // 10 milliseconds resolution
+
+                    const hours = Math.floor(currentTimeInMilliseconds / 3600000);
+                    const minutes = Math.floor((currentTimeInMilliseconds % 3600000) / 60000);
+                    const seconds = Math.floor((currentTimeInMilliseconds % 60000) / 1000);
+                    const milliseconds = currentTimeInMilliseconds % 1000;
+
+                    timerDisplay.textContent = `${hours}:${minutes}:${seconds}.${milliseconds < 100 ? '0' : ''}${milliseconds < 10 ? '0' : ''}${milliseconds}`;
+                } else {
+                    clearInterval(timerInterval);
+                    timerRunning = false;
+                    intervalCounter++;
+                    intervalCounterDisplay.textContent = `Intervals: ${intervalCounter}`;
+                    startTimer(); // Restart the timer
+                }
+            }, 10); // 10 milliseconds resolution
+
+            timerRunning = true;
+        }
+    }
+
+    function resetTimer() {
+        clearInterval(timerInterval);
+        timerRunning = false;
+        intervalCounter = 0;
+
+        const timerInput = document.getElementById('timer-input');
+        const timerDisplay = document.getElementById('timer');
+        const intervalCounterDisplay = document.getElementById('interval-counter');
+
+        timerInput.value = '25:00:00';
+        timerDisplay.textContent = '25:00:00.000';
+        intervalCounterDisplay.textContent = 'Intervals: 0';
+    }
+
+    function stopTimer() {
+        clearInterval(timerInterval);
+        timerRunning = false;
+    }
+</script>
+
+</body>
+</html>
+
